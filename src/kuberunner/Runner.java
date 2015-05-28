@@ -1,37 +1,31 @@
 package kuberunner;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.remote.server.handler.BySelector;
 
 /**
  * Created by george on 5/26/15.
+ *
+ * Loads Kuku-Kube and plays the game
  */
 public class Runner
 {
-    private String link;
     private WebDriver driver;
 
     /**
      * Loads the specified url in the browser
      *
-     * @param url     The url of the page
-     * @param browser The browser. Firefox and Chrome are supported
+     * @param browser The browser. Firefox supported. Chrome may be supported in the future.
      */
-    public Runner(String url, String browser)
+    public Runner( String browser )
     {
-        this.link = url;
-
         browser = browser.toUpperCase();
         if (browser.equals("FIREFOX"))
         {
             driver = new FirefoxDriver();
         }
 
-        driver.get(link);
+        driver.get("http://kuku-kube.com");
     }
 
     /**
@@ -76,15 +70,30 @@ public class Runner
     }
 
     /**
+     * Checks if an alert is present
+     * @return True if alert is present, false otherwise
+     */
+    public boolean isAlertPresent()
+    {
+        try
+        {
+            driver.switchTo().alert();
+            return true;
+        }
+        catch( NoAlertPresentException e )
+        {
+            return false;
+        }
+    }
+
+    /**
      * Returns whether the game is running or not
-     *
-     * @param box   The Webelement that contains level information
      * @param level The current level
      * @return True if the game is running, false otherwise
      */
-    public boolean isRunning(WebElement box, int[] level)
+    public boolean isRunning( int[] level )
     {
-        box = driver.findElement(By.cssSelector("#box"));
+        WebElement box = driver.findElement(By.cssSelector("#box"));
         String lv = box.getAttribute("class");
         level[0] = lv.charAt(2) - 48;
 
@@ -92,14 +101,7 @@ public class Runner
         String timeStr = timeElem.getText();
         int time = stringToInt(timeStr);
 
-        if (level[0] != 1 && time != 1)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return level[0] != 1 && time != 1;
     }
 
     /**
@@ -180,13 +182,12 @@ public class Runner
 
     public static void main( String [] args )
     {
-        Runner game = new Runner( "http://kuku-kube.com/", "firefox" );
+        Runner game = new Runner( "firefox" );
         game.startGame();
 
-        WebElement box = game.driver.findElement(By.cssSelector("#box"));
         int [] level = new int [1];
 
-        while( game.isRunning(box, level) )
+        while( game.isRunning(level) )
         {
             game.findAndClick( level );
         }
