@@ -3,8 +3,6 @@ package kuberunner;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
-import java.util.List;
-
 /**
  * Created by george on 5/26/15.
  *
@@ -108,29 +106,30 @@ public class Runner
     /**
      * From three square rgb values, determines whether the squares
      * are different and if one is, it clicks that one.
-     * @param squares The array of squares
+     *
+     * NOTE: Remember that the list of WebElement span starts at 1 not 0!
      * @param values The array of corresponding values
      * @return Whether a click was made or not
      */
-    public boolean firstThree(List<WebElement> squares, String[] values)
+    public boolean firstThree( String[] values )
     {
         boolean found = false;
         if( !values[0].equals(values[1]) )
         {
             if( !values[0].equals(values[2]) )
             {
-                squares.get(0).click();
+                driver.findElement(By.cssSelector("#box > span:nth-child(1)")).click();
                 found = true;
             }
             else
             {
-                squares.get(1).click();
+                driver.findElement(By.cssSelector("#box > span:nth-child(2)")).click();
                 found = true;
             }
         }
         else if( !values[0].equals(values[2]) )
         {
-            squares.get(2).click();
+            driver.findElement(By.cssSelector("#box > span:nth-child(3)")).click();
             found = true;
         }
 
@@ -138,40 +137,52 @@ public class Runner
     }
 
     /**
+     * Parses the source page for the html values of the squares
+     * @return An array of the html values of the squares
+     */
+    public String[] parseSrc()
+    {
+        String [] values;
+
+        String src = driver.getPageSource();
+        int begin = src.indexOf("496px;\"><") + 8;
+        int endScope = src.indexOf("<div id=\"dialog\"");
+        src = src.substring(begin, endScope);
+        int end = src.indexOf("</span></div>");
+        src = src.substring(0, end);
+
+        values = src.split("</span>");
+
+        return values;
+    }
+
+    /**
      * Finds the different square and clicks it in the level
      */
     public void findAndClick()
     {
-        List< WebElement > squares = driver.findElements(By.cssSelector("#box > *"));
-        String [] firstThreeVals = new String[3];
         String normalVal;
-
-        for( int i = 0; i < 3; i++ )
-        {
-            String temp = squares.get(i).getAttribute("style");
-            firstThreeVals[i] = temp.substring(22, temp.length()-2);
-        }
-
-        // Check if first 3 squares
-        if( firstThree(squares, firstThreeVals) )
+        String [] values = parseSrc();
+        if( firstThree(values) )
         {
             return;
         }
         else
         {
-            normalVal = firstThreeVals[0];
+            normalVal = values[0];
         }
 
-        for( int i = 3; i < squares.size(); i++ )
+        for( int i = 3; i < values.length; i++ )
         {
-            String val = squares.get(i).getAttribute("style");
-            val = val.substring(22, val.length()-2);
-            if( !val.equals(normalVal) )
+            if( !values[i].equals(normalVal) )
             {
-                squares.get(i).click();
+                int squareIndex = i + 1;
+                String squareCSS = "#box > span:nth-child(" + squareIndex + ")";
+                driver.findElement(By.cssSelector(squareCSS)).click();
                 return;
             }
         }
+
     }
 
     public static void main( String [] args )
