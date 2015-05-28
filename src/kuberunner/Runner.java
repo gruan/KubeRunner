@@ -1,12 +1,16 @@
 package kuberunner;
 
 import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+
+import java.util.Scanner;
 
 /**
  * Created by george on 5/26/15.
  *
- * Loads Kuku-Kube and plays the game
+ * Loads Kuku-Kube and plays the game.
+ * Firefox and Chrome are supported. Chrome works much faster than firefox.
  */
 public class Runner
 {
@@ -15,7 +19,7 @@ public class Runner
     /**
      * Loads the specified url in the browser
      *
-     * @param browser The browser. Firefox supported. Chrome may be supported in the future.
+     * @param browser The browser. Firefox and Chrome are supported.
      */
     public Runner( String browser )
     {
@@ -23,6 +27,10 @@ public class Runner
         if (browser.equals("FIREFOX"))
         {
             driver = new FirefoxDriver();
+        }
+        if(browser.equals("CHROME"))
+        {
+            driver = new ChromeDriver();
         }
 
         driver.get("http://kuku-kube.com");
@@ -71,13 +79,16 @@ public class Runner
 
     /**
      * Checks if an alert is present
+     * @param user The username of the user
      * @return True if alert is present, false otherwise
      */
-    public boolean isAlertPresent()
+    public boolean isAlertPresent( String user )
     {
         try
         {
-            driver.switchTo().alert();
+            Alert alert = driver.switchTo().alert();
+            alert.sendKeys(user);
+            alert.accept();
             return true;
         }
         catch( NoAlertPresentException e )
@@ -146,7 +157,7 @@ public class Runner
 
         String src = driver.getPageSource();
         int begin = src.indexOf("496px;\"><") + 8;
-        int endScope = src.indexOf("<div id=\"dialog\"");
+        int endScope = src.indexOf("id=\"dialog\"");
         src = src.substring(begin, endScope);
         int end = src.indexOf("</span></div>");
         src = src.substring(0, end);
@@ -187,12 +198,39 @@ public class Runner
 
     public static void main( String [] args )
     {
-        Runner game = new Runner( "firefox" );
+        String user;
+        String browser;
+        Scanner input = new Scanner( System.in );
+        boolean invalid = true;
+
+        do
+        {
+            System.out.println("What is your name?");
+            user = input.nextLine();
+            System.out.println("Which browser would you like to use? Firefox or Chrome (Note: Chrome runs faster).");
+            browser = input.nextLine();
+
+            if( user!= null && (browser.toUpperCase().equals("CHROME") || browser.toUpperCase().equals("FIREFOX")) )
+            {
+                System.out.println("Please wait...");
+                invalid = false;
+            }
+            else
+            {
+                System.out.println("Error! please input a non-empty username and a valid browser!");
+            }
+
+        } while(invalid);
+
+        Runner game = new Runner( browser );
         game.startGame();
 
         while( game.isRunning() )
         {
             game.findAndClick();
         }
+
+        while( !game.isAlertPresent(user) )
+        {}
     }
 }
