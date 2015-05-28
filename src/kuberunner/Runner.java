@@ -3,6 +3,8 @@ package kuberunner;
 import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
+import java.util.List;
+
 /**
  * Created by george on 5/26/15.
  *
@@ -111,25 +113,25 @@ public class Runner
      * @param values The array of corresponding values
      * @return Whether a click was made or not
      */
-    public boolean clickSquare(WebElement[] squares, String[] values)
+    public boolean clickSquare(List<WebElement> squares, String[] values)
     {
         boolean found = false;
         if( !values[0].equals(values[1]) )
         {
             if( !values[0].equals(values[2]) )
             {
-                squares[0].click();
+                squares.get(0).click();
                 found = true;
             }
             else
             {
-                squares[1].click();
+                squares.get(1).click();
                 found = true;
             }
         }
         else if( !values[0].equals(values[2]) )
         {
-            squares[2].click();
+            squares.get(2).click();
             found = true;
         }
 
@@ -143,17 +145,14 @@ public class Runner
     public void findAndClick( int [] level )
     {
         int elements = level[0] * level[0];
-        WebElement [] squares = new WebElement[3];
+        List< WebElement > squares = driver.findElements(By.cssSelector("#box > *"));
         String [] values = new String[3];
         String normalVal;
 
         for( int i = 0; i < 3; i++ )
         {
-            int j = i + 1;
-            String squareCSS = "#box > span:nth-child(" + j + ")";
-
-            squares[i] = driver.findElement(By.cssSelector(squareCSS));
-            values[i] = squares[i].getAttribute("style");
+            String temp = squares.get(i).getAttribute("style");
+            values[i] = temp.substring(22, temp.length()-2);
         }
 
         // Check if first 3 squares
@@ -168,13 +167,11 @@ public class Runner
 
         for( int i = 3; i < elements; i++ )
         {
-            int j = i + 1;
-            String squareCSS = "#box > span:nth-child(" + j + ")";
-            WebElement sqr = driver.findElement(By.cssSelector(squareCSS));
-            String val = sqr.getAttribute("style");
+            String val = squares.get(i).getAttribute("style");
+            val = val.substring(22, val.length()-2);
             if( !val.equals(normalVal) )
             {
-                sqr.click();
+                squares.get(i).click();
                 return;
             }
         }
