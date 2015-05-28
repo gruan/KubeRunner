@@ -90,20 +90,19 @@ public class Runner
 
     /**
      * Returns whether the game is running or not
-     * @param level The current level
      * @return True if the game is running, false otherwise
      */
-    public boolean isRunning( int[] level )
+    public boolean isRunning()
     {
         WebElement box = driver.findElement(By.cssSelector("#box"));
         String lv = box.getAttribute("class");
-        level[0] = lv.charAt(2) - 48;
+        int level = lv.charAt(2) - 48;
 
         WebElement timeElem = driver.findElement(By.cssSelector("#room > header > span.time"));
         String timeStr = timeElem.getText();
         int time = stringToInt(timeStr);
 
-        return level[0] != 1 && time != 1;
+        return level != 1 && time != 1;
     }
 
     /**
@@ -113,7 +112,7 @@ public class Runner
      * @param values The array of corresponding values
      * @return Whether a click was made or not
      */
-    public boolean clickSquare(List<WebElement> squares, String[] values)
+    public boolean firstThree(List<WebElement> squares, String[] values)
     {
         boolean found = false;
         if( !values[0].equals(values[1]) )
@@ -140,32 +139,30 @@ public class Runner
 
     /**
      * Finds the different square and clicks it in the level
-     * @param level The current level in the game
      */
-    public void findAndClick( int [] level )
+    public void findAndClick()
     {
-        int elements = level[0] * level[0];
         List< WebElement > squares = driver.findElements(By.cssSelector("#box > *"));
-        String [] values = new String[3];
+        String [] firstThreeVals = new String[3];
         String normalVal;
 
         for( int i = 0; i < 3; i++ )
         {
             String temp = squares.get(i).getAttribute("style");
-            values[i] = temp.substring(22, temp.length()-2);
+            firstThreeVals[i] = temp.substring(22, temp.length()-2);
         }
 
         // Check if first 3 squares
-        if( clickSquare( squares, values ) )
+        if( firstThree(squares, firstThreeVals) )
         {
             return;
         }
         else
         {
-            normalVal = values[0];
+            normalVal = firstThreeVals[0];
         }
 
-        for( int i = 3; i < elements; i++ )
+        for( int i = 3; i < squares.size(); i++ )
         {
             String val = squares.get(i).getAttribute("style");
             val = val.substring(22, val.length()-2);
@@ -182,11 +179,9 @@ public class Runner
         Runner game = new Runner( "firefox" );
         game.startGame();
 
-        int [] level = new int [1];
-
-        while( game.isRunning(level) )
+        while( game.isRunning() )
         {
-            game.findAndClick( level );
+            game.findAndClick();
         }
     }
 }
