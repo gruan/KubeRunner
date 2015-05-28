@@ -10,14 +10,10 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="file://$MODULE_DIR$/selenium-2.45.0" />
+          <root url="jar://$MODULE_DIR$/selenium-server-standalone-2.45.0.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="file://$MODULE_DIR$/selenium-2.45.0" />
-        </SOURCES>
-        <jarDirectory url="file://$MODULE_DIR$/selenium-2.45.0" recursive="false" />
-        <jarDirectory url="file://$MODULE_DIR$/selenium-2.45.0" recursive="false" type="SOURCES" />
+        <SOURCES />
       </library>
     </orderEntry>
   </component>
